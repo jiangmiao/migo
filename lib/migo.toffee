@@ -1,0 +1,124 @@
+pg = require 'pg'
+fs = require 'fs'
+
+ok = (e) ->
+    if e
+        throw new Error(e)
+
+indent = (l) ->
+    l.replace(/(^|\n)/g, "$&\t")
+
+class DB
+    open: (conn, autocb) ->
+        if typeof(conn) != 'object'
+            conn.dbname ?= conn.database
+            conn.ssl ?= conn.sslmode
+        @db = new pg.Client(conn)
+        @db.connect!
+
+    close: (autocb) ->
+        @db.end()
+
+    q: ->
+        @query arguments...
+
+    drop: (n, autocb) ->
+        @q! """
+            DROP TABLE IF EXISTS #{n}_migo_deleted;
+            ALTER TABLE #{n} RENAME TO #{n}_migo_deleted;
+        """
+    query: (command, params..., autocb) ->
+        if m = command.match /(BEGIN|COMMIT|ROLLBACK)/
+            # p "[#{m[1]}]"
+        else
+            p indent(command), params
+        ok @db.query! command, params
+
+    begin: (autocb) ->
+        @query! "BEGIN"
+
+    commit: (autocb) ->
+        @query! "COMMIT"
+
+    rollback: (autocb) ->
+        @query! "ROLLBACK"
+
+p = ->
+    console.log arguments...
+
+init = (conn) ->
+    migs = []
+    db = null
+    id = 0
+
+    _migrate = (args, autocb) ->
+        [last_id] = args
+        if last_id
+            last_id = parseInt(last_id, 10)
+        else
+            last_id = Infinity
+
+        _, id = fs.readFile!('migo.id', 'UTF-8')
+        id ?= 0
+        id = parseInt(id, 10)
+
+        p "FROM: #{id}"
+        p "TO:   #{last_id}"
+        while id != last_id
+            if id < last_id
+                ward = 'up'
+                nid = id + 1
+                mig = migs[nid-1]
+                ws = '^'
+            else
+                ward = 'down'
+                nid = id - 1
+                mig = migs[nid]
+                ws = 'v'
+            if !mig
+                break
+            [name, fns] = mig
+            p "#{id} #{ws} ---- #{name} ----"
+            p ""
+            fn = fns[ward]
+            if fn
+                if typeof fn == 'string'
+                    ((autocb)->
+                        @q! fn
+                        @
+                    ).call! db
+                else
+                    fn.call! db
+            id = nid
+            p ""
+
+    _begin = (autocb) ->
+        db ?= new DB()
+        ok db.open! conn
+        ok db.begin!
+
+    _rollback = (autocb) ->
+        ok db.rollback!
+        ok db.close!
+
+    _commit = (autocb) ->
+        ok db.commit!
+        ok fs.writeFile!('migo.id', id, 'UTF-8')
+        ok db.close!
+
+    add = (name, fns) ->
+        migs.push [name, fns]
+
+    migrate = (args..., autocb) ->
+        _begin!
+        _migrate! args
+        _commit!
+
+    pretend = (args..., autocb) ->
+        _begin!
+        _migrate! args
+        _rollback!
+
+    {add, pretend, migrate}
+
+module.exports = {init}
