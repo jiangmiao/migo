@@ -1,5 +1,9 @@
 ## PostgreSQL Database Migration
 
+### Installation
+
+    npm install migo
+
 ### Usage
 
     $ migo.js -h
