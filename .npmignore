@@ -1,1 +1,4 @@
 *.tgz
+*.sh
+*.id
+node_modules
