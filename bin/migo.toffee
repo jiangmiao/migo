@@ -30,6 +30,9 @@ data.replace /^(.*?)=(.*)/m, (_, k, v) ->
     conf[k] = v
 
 m = migo.init conf
+if !opt.argv[0]
+    ok "MIGOFILE is missing"
+    process.exit(1)
 m.parseFile! opt.argv[0]
 m.migrate! opt.argv[1]
 migo.close()

@@ -29,6 +29,10 @@
       return conf[k] = v;
     });
     m = migo.init(conf);
+    if (!opt.argv[0]) {
+      ok("MIGOFILE is missing");
+      process.exit(1);
+    }
     m.parseFile(opt.argv[0], function() {
       m.migrate(opt.argv[1], function() {
         return migo.close();
