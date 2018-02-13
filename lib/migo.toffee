@@ -3,6 +3,8 @@ fs = require 'fs'
 readline = require 'readline'
 chalk = require 'chalk'
 rl = readline.createInterface input: process.stdin, output: process.stdout
+rl.on 'SIGINT', ->
+    process.exit 1
 
 ok = (e) ->
     if e
@@ -22,7 +24,7 @@ indent = (l) ->
 
 class DB
     open: (conn, autocb) ->
-        if typeof(conn) != 'object'
+        if typeof(conn) == 'object'
             conn.database ?= conn.dbname
             conn.ssl ?= conn.sslmode
         @db = new pg.Client(conn)
@@ -83,18 +85,20 @@ init = (conn) ->
                 ward = 'up'
                 nid = id + 1
                 mig = migs[nid-1]
+                cid = nid
                 ws = 'U'
                 color = chalk.green
             else
                 ward = 'down'
                 nid = id - 1
                 mig = migs[nid]
+                cid = id
                 ws = 'D'
                 color = chalk.yellow
             if !mig
                 break
             [name, fns] = mig
-            p color "#{id} #{ws} ---- #{name} ----"
+            p color "#{cid} #{ws} ---- #{name} ----"
             fn = fns[ward]
             p ""
             p fn
