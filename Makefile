@@ -1,4 +1,4 @@
-all: lib/migo.js bin/migo.js
+all: lib/migo.js bin/migo-cli.js
 
 lib/%.js: lib/%.toffee
 	toffee -c -o lib $<
