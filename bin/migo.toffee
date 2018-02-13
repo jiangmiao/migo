@@ -1,15 +1,16 @@
 fs = require 'fs'
 migo = require '..'
+{ok} = migo
 VERSION=0.1
 opt = require('node-getopt').create([
-    ['c', 'conf=FILENAME', 'configure file']
+    ['c', 'conf=CONFILE', 'configure file']
     ['h', 'help']
 ])
 .bindHelp("""
 migo v#{VERSION} - PostgreSQL Database Migration
 
 Usage:
-  migo.js [OPTION] FILENAME [VERSION]
+  migo.js [OPTION] MIGOFILE [VERSION]
 
 Options:
 [[OPTIONS]]
@@ -18,12 +19,6 @@ More help on https://github.com/jiangmiao/migo
 """)
 .parseSystem()
 
-ok = (e) ->
-    if e
-        console.log e.message ? e
-        process.exit 1
-
-p = console.log
 conf = opt.options.conf
 conf ?= 'migo.conf'
 err, data = fs.readFile! conf, 'UTF-8'

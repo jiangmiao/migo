@@ -14,7 +14,8 @@ p = ->
     console.log arguments...
 
 pe = (err) ->
-    p chalk.red(err)
+    if err
+        p chalk.red(err)
 
 indent = (l) ->
     l.replace(/(^|\n)/g, "$&\t")
@@ -102,7 +103,7 @@ init = (conn) ->
                 answer = rl.question! 'Are you sure? (yes/y/no/n) '
                 p ""
                 unless answer.match(/^(y|yes)$/)
-                    die 'procedure terminated.'
+                    ok new Error 'procedure terminated.'
             if fn
                 if typeof fn == 'string'
                     ((autocb)->
@@ -120,13 +121,13 @@ init = (conn) ->
 
     _rollback = (autocb) ->
         ok db.rollback!
-        ok db.close!
+        db.close!
         rl.close()
 
     _commit = (autocb) ->
         ok db.commit!
         ok fs.writeFile!('migo.id', id, 'UTF-8')
-        ok db.close!
+        db.close!
         rl.close()
 
     add = (name, fns) ->
@@ -169,4 +170,4 @@ init = (conn) ->
 
 close = ->
     rl.close()
-module.exports = {init, close}
+module.exports = {init, close, ok}
