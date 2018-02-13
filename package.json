@@ -3,9 +3,9 @@
   "version": "0.1.1",
   "description": "migration tool",
   "main": "index.js",
-	"bin": {
-		"migo.js": "bin/migo.js"
-	},
+  "bin": {
+    "migo.js": "bin/migo.js"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -20,9 +20,9 @@
     "database",
     "migration"
   ],
-	"dependencies": {
-		"pg": "*",
-		"chalk": "*",
-		"node-getopt": "*"
-	}
+  "dependencies": {
+    "pg": "*",
+    "chalk": "*",
+    "node-getopt": "*"
+  }
 }
