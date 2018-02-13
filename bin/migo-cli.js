@@ -23,7 +23,7 @@
     err = arguments[0], data = arguments[1];
     ok(err);
     conf = {};
-    data.replace(/^(.*?)=(.*)/m, function(_, k, v) {
+    data.replace(/^(.*?)=(.*)/mg, function(_, k, v) {
       k = k.trim();
       v = v.trim();
       return conf[k] = v;

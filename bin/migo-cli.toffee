@@ -24,7 +24,7 @@ conf ?= 'migo.conf'
 err, data = fs.readFile! conf, 'UTF-8'
 ok err
 conf = {}
-data.replace /^(.*?)=(.*)/m, (_, k, v) ->
+data.replace /^(.*?)=(.*)/mg, (_, k, v) ->
     k = k.trim()
     v = v.trim()
     conf[k] = v
