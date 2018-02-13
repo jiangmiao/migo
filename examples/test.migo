@@ -1,0 +1,15 @@
+#1
+
+		CREATE TABLE books(id serial PRIMARY KEY);
+
+--
+
+		DROP TABLE books;
+
+#2 create table users
+
+		CREATE TABLE users(id serial PRIMARY KEY);
+
+--
+
+		DROP TABLE users;

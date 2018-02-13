@@ -1,9 +1,20 @@
 pg = require 'pg'
 fs = require 'fs'
+readline = require 'readline'
+chalk = require 'chalk'
+rl = readline.createInterface input: process.stdin, output: process.stdout
 
 ok = (e) ->
     if e
-        throw new Error(e)
+        pe e.message ? e
+        rl.close()
+        process.exit(1)
+
+p = ->
+    console.log arguments...
+
+pe = (err) ->
+    p chalk.red(err)
 
 indent = (l) ->
     l.replace(/(^|\n)/g, "$&\t")
@@ -11,7 +22,7 @@ indent = (l) ->
 class DB
     open: (conn, autocb) ->
         if typeof(conn) != 'object'
-            conn.dbname ?= conn.database
+            conn.database ?= conn.dbname
             conn.ssl ?= conn.sslmode
         @db = new pg.Client(conn)
         @db.connect!
@@ -28,10 +39,15 @@ class DB
             ALTER TABLE #{n} RENAME TO #{n}_migo_deleted;
         """
     query: (command, params..., autocb) ->
+        ###
         if m = command.match /(BEGIN|COMMIT|ROLLBACK)/
             # p "[#{m[1]}]"
         else
-            p indent(command), params
+            log = command
+            if params.length
+                log += "\n\n    " + params
+            p log
+        ###
         ok @db.query! command, params
 
     begin: (autocb) ->
@@ -42,9 +58,6 @@ class DB
 
     rollback: (autocb) ->
         @query! "ROLLBACK"
-
-p = ->
-    console.log arguments...
 
 init = (conn) ->
     migs = []
@@ -69,18 +82,27 @@ init = (conn) ->
                 ward = 'up'
                 nid = id + 1
                 mig = migs[nid-1]
-                ws = '^'
+                ws = 'U'
+                color = chalk.green
             else
                 ward = 'down'
                 nid = id - 1
                 mig = migs[nid]
-                ws = 'v'
+                ws = 'D'
+                color = chalk.yellow
             if !mig
                 break
             [name, fns] = mig
-            p "#{id} #{ws} ---- #{name} ----"
-            p ""
+            p color "#{id} #{ws} ---- #{name} ----"
             fn = fns[ward]
+            p ""
+            p fn
+            p ""
+            if ward == 'down'
+                answer = rl.question! 'Are you sure? (yes/y/no/n) '
+                p ""
+                unless answer.match(/^(y|yes)$/)
+                    die 'procedure terminated.'
             if fn
                 if typeof fn == 'string'
                     ((autocb)->
@@ -90,7 +112,6 @@ init = (conn) ->
                 else
                     fn.call! db
             id = nid
-            p ""
 
     _begin = (autocb) ->
         db ?= new DB()
@@ -100,11 +121,13 @@ init = (conn) ->
     _rollback = (autocb) ->
         ok db.rollback!
         ok db.close!
+        rl.close()
 
     _commit = (autocb) ->
         ok db.commit!
         ok fs.writeFile!('migo.id', id, 'UTF-8')
         ok db.close!
+        rl.close()
 
     add = (name, fns) ->
         migs.push [name, fns]
@@ -113,12 +136,37 @@ init = (conn) ->
         _begin!
         _migrate! args
         _commit!
+        p chalk.green 'COMMIT'
 
     pretend = (args..., autocb) ->
         _begin!
         _migrate! args
         _rollback!
+        p chalk.red 'ROLLBACK'
 
-    {add, pretend, migrate}
+    parseFile = (fileName, autocb) ->
+        err, data = fs.readFile! fileName, 'UTF-8'
+        ok err
+        ms = data.split /(?:^|\n)#(\d+)(.*)/
+        i = 0
+        ms.shift()
+        j = 1
+        while ms[i]?
+            id = parseInt(ms[i], 10)
+            if j != id
+                ok("id is not increase")
+            j++
+            title = ms[i+1]
+            body = ms[i+2]
+            [up, down] = body.split /(?:^|\n)--/
+            down ?= ''
+            up = '    '+up.trim()
+            down = '    '+down.trim()
+            add title, {up, down}
+            i += 3
+        @
+    {add, pretend, migrate, parseFile}
 
-module.exports = {init}
+close = ->
+    rl.close()
+module.exports = {init, close}
