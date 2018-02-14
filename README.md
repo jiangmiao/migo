@@ -2,19 +2,23 @@
 
 ### Installation
 
-    npm install migo
+    npm install -g migo
 
 ### Usage
 
     $ migo.js -h
-    migo v0.1.1 - PostgreSQL Database Migration
+    migo v0.1.3 - PostgreSQL Database Migration
 
     Usage:
       migo.js [OPTION] MIGOFILE [VERSION]
 
     Options:
-      -c, --conf=CONFILE  configure file
+      -c, --conf=CONFFILE  configure file
       -h, --help
+
+    Files:
+      migo.conf default configure file
+      migo.id   migration version
 
 ### Migo Configure File
 
@@ -61,7 +65,7 @@ Up and Down Spliter:
 
 SQL Command:
 
-    Any text between headers and spliters, indented text block is recommended.
+    Indented text block between headers and spliters
 
 #### Examples
 
@@ -133,7 +137,6 @@ Migrate to 0
 Migrate to version 1
 
     $ migo.js test.migo 1
-
     FROM: 0
     TO:   1
     1 U ----  ----
