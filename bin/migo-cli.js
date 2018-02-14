@@ -11,7 +11,7 @@
 
   VERSION = '0.1.2';
 
-  opt = require('node-getopt').create([['c', 'conf=CONFILE', 'configure file'], ['h', 'help']]).bindHelp("migo v" + VERSION + " - PostgreSQL Database Migration\n\nUsage:\n  migo.js [OPTION] MIGOFILE [VERSION]\n\nOptions:\n[[OPTIONS]]\n\nMore help on https://github.com/jiangmiao/migo").parseSystem();
+  opt = require('node-getopt').create([['c', 'conf=CONFILE', 'configure file'], ['h', 'help']]).bindHelp("migo v" + VERSION + " - PostgreSQL Database Migration\n\nUsage:\n  migo.js [OPTION] MIGOFILE [VERSION]\n\nOptions:\n[[OPTIONS]]\n\nFiles:\n  migo.conf default configure file\n  migo.id   migration version\n\nMore help on https://github.com/jiangmiao/migo").parseSystem();
 
   conf = opt.options.conf;
 

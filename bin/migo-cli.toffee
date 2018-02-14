@@ -15,6 +15,10 @@ Usage:
 Options:
 [[OPTIONS]]
 
+Files:
+  migo.conf default configure file
+  migo.id   migration version
+
 More help on https://github.com/jiangmiao/migo
 """)
 .parseSystem()
