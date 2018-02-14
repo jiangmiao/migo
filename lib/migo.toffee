@@ -1,7 +1,6 @@
 pg = require 'pg'
 fs = require 'fs'
 readline = require 'readline'
-chalk = require 'chalk'
 rl = readline.createInterface input: process.stdin, output: process.stdout
 rl.on 'SIGINT', ->
     process.exit 1
@@ -18,6 +17,16 @@ p = ->
 pe = (err) ->
     if err
         p chalk.red(err)
+
+chalk = do ->
+    color = (x, v) ->
+        "\x1b[#{x}m#{v}\x1b[0m"
+    red: (v)->
+        color '0;31', v
+    green: (v) ->
+        color '0;32', v
+    yellow: (v) ->
+        color '0;33', v
 
 indent = (l) ->
     l.replace(/(^|\n)/g, "$&\t")
@@ -42,15 +51,6 @@ class DB
             ALTER TABLE #{n} RENAME TO #{n}_migo_deleted;
         """
     query: (command, params..., autocb) ->
-        ###
-        if m = command.match /(BEGIN|COMMIT|ROLLBACK)/
-            # p "[#{m[1]}]"
-        else
-            log = command
-            if params.length
-                log += "\n\n    " + params
-            p log
-        ###
         ok @db.query! command, params
 
     begin: (autocb) ->
