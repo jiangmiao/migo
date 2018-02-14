@@ -23,7 +23,7 @@
 ### Migo Configure File
 
     # Database Conn Info
-    # The same as node modules 'pg'
+    # The same as node module 'pg'
     user=dbuser
     host=database.server.com
     database=mydb
