@@ -66,6 +66,7 @@ init = (conn) ->
     migs = []
     db = null
     id = 0
+    id_file = null
 
     _migrate = (args, autocb) ->
         [last_id] = args
@@ -74,7 +75,7 @@ init = (conn) ->
         else
             last_id = Infinity
 
-        _, id = fs.readFile!('migo.id', 'UTF-8')
+        _, id = fs.readFile!(id_file, 'UTF-8')
         id ?= 0
         id = parseInt(id, 10)
 
@@ -130,7 +131,7 @@ init = (conn) ->
 
     _commit = (autocb) ->
         ok db.commit!
-        ok fs.writeFile!('migo.id', id, 'UTF-8')
+        ok fs.writeFile!(id_file, id, 'UTF-8')
         db.close!
         rl.close()
 
@@ -150,6 +151,7 @@ init = (conn) ->
         p chalk.red 'ROLLBACK'
 
     parseFile = (fileName, autocb) ->
+        id_file = fileName + '.id'
         err, data = fs.readFile! fileName, 'UTF-8'
         ok err
         ms = data.split /(?:^|\n)#(\d+)(.*)/
