@@ -7,7 +7,7 @@
 ### Usage
 
     $ migo.js -h
-    migo v0.1.3 - PostgreSQL Database Migration
+    migo v0.1.4 - PostgreSQL Database Migration
 
     Usage:
       migo.js [OPTION] MIGOFILE [VERSION]
