@@ -1,7 +1,7 @@
 fs = require 'fs'
 migo = require '..'
 {ok} = migo
-VERSION='0.1.3'
+VERSION='0.1.4'
 opt = require('node-getopt').create([
     ['c', 'conf=CONFFILE', 'configure file']
     ['h', 'help']
@@ -16,17 +16,25 @@ Options:
 [[OPTIONS]]
 
 Files:
-  migo.conf default configure file
-  migo.id   migration version
+  foo.migo       MIGOFILE file
+  $MIGOFILE.id   migration version
+  $MIGOFILE.conf CONFFILE default configure file
 
 More help on https://github.com/jiangmiao/migo
 """)
 .parseSystem()
 
-conf = opt.options.conf
-conf ?= 'migo.conf'
+if opt.argv.length == 0
+    opt.showHelp()
+    process.exit(1)
+
+[migoFile, targetVersion] = opt.argv
+{conf} = opt.options
+conf ?= migoFile + '.conf'
+
 err, data = fs.readFile! conf, 'UTF-8'
 ok err
+
 conf = {}
 data.replace /^(.*?)=(.*)/mg, (_, k, v) ->
     k = k.trim()
@@ -34,9 +42,6 @@ data.replace /^(.*?)=(.*)/mg, (_, k, v) ->
     conf[k] = v
 
 m = migo.init conf
-if !opt.argv[0]
-    ok "MIGOFILE is missing"
-    process.exit(1)
-m.parseFile! opt.argv[0]
-m.migrate! opt.argv[1]
+m.parseFile! migoFile
+m.migrate! targetVersion
 migo.close()
